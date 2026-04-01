@@ -1,6 +1,6 @@
 # Order Portal
 
-A B2B order management portal MVP built with Next.js 14 (App Router), Prisma ORM, and SQLite.
+A B2B order management portal MVP built with Next.js 15 (App Router), Prisma ORM, and SQLite.
 
 ## Prerequisites
 

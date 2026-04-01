@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Link from 'next/link'
+import LogoutButton from './LogoutButton'
 
 export const metadata: Metadata = {
   title: 'Order Portal',
@@ -19,6 +20,9 @@ export default function RootLayout({
           <Link href="/" className="nav-brand">Order Portal</Link>
           <Link href="/orders" className="nav-link">My Orders</Link>
           <Link href="/manufacturer/orders" className="nav-link">Manufacturer View</Link>
+          <span style={{ marginLeft: 'auto' }}>
+            <LogoutButton />
+          </span>
         </nav>
         {children}
       </body>

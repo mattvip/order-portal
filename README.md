@@ -2,6 +2,8 @@
 
 A B2B order management portal built with Next.js 15, Prisma ORM, and PostgreSQL.
 
+A **shared password** protects every page and API route. Set the `PORTAL_PASSWORD` environment variable to enable it.
+
 ## Run locally
 
 ```bash
@@ -12,11 +14,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-You need a `DATABASE_URL` environment variable pointing at a PostgreSQL database. For local development you can use a `.env` file:
+You need two environment variables. Create a `.env.local` file (never commit it):
 
 ```
 DATABASE_URL="postgresql://user:password@localhost:5432/order_portal"
+PORTAL_PASSWORD="choose-a-strong-password"
 ```
+
+### Logging in / out
+
+- Navigate to `http://localhost:3000` — you'll be redirected to `/login`.
+- Enter the value you put in `PORTAL_PASSWORD` and click **Sign in**.
+- A secure, httpOnly cookie (`portal_auth`) keeps you authenticated for 7 days.
+- Click **Log out** in the top-right of the nav bar to clear the cookie and return to `/login`.
 
 ## Deploy to Vercel with a Neon database (get a public URL)
 
@@ -36,12 +46,18 @@ Follow these steps once and you'll have a link you can share with your manufactu
 4. On the "Configure Project" screen:
    - Change the **Build Command** to `npm run vercel-build` (this creates the database tables and then builds the site).
    - Leave everything else as the default.
-5. Before clicking Deploy, scroll down to **Environment Variables** and add one:
-   - **Name:** `DATABASE_URL`
-   - **Value:** *(paste the Neon connection string from Step 1)*
+5. Before clicking Deploy, scroll down to **Environment Variables** and add:
+   - **Name:** `DATABASE_URL` / **Value:** *(paste the Neon connection string from Step 1)*
+   - **Name:** `PORTAL_PASSWORD` / **Value:** *(choose a strong password — anyone who knows this can access the portal)*
 6. Click **Deploy** and wait 2–3 minutes.
 
-Vercel will give you a URL like `https://order-portal-xyz.vercel.app`. That's your public link — share it with your manufacturer.
+Vercel will give you a URL like `https://order-portal-xyz.vercel.app`. That's your public link — share it with your manufacturer (along with the password).
+
+### Logging in / out (production)
+
+- Visit your Vercel URL — you'll be redirected to `/login`.
+- Enter your `PORTAL_PASSWORD` and click **Sign in**.
+- Click **Log out** in the top-right nav bar to end the session.
 
 ### If you redeploy later
 
@@ -71,5 +87,4 @@ Draft → Submitted → Accepted → In Production → Completed
 
 ## Notes
 
-- No login/password is implemented — anyone with the URL can view and submit orders. This is fine for a small private team.
 - Orders are stored in your Neon PostgreSQL database and persist permanently.

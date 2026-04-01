@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_STATUSES = ['Draft', 'Submitted', 'Accepted', 'In Production', 'Completed', 'Rejected']
 
 export async function GET(

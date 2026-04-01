@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Order" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "sku" TEXT NOT NULL,
     "qtySmall" INTEGER NOT NULL DEFAULT 0,
@@ -9,8 +9,10 @@ CREATE TABLE "Order" (
     "qtyXL" INTEGER NOT NULL DEFAULT 0,
     "qty2X" INTEGER NOT NULL DEFAULT 0,
     "qty3X" INTEGER NOT NULL DEFAULT 0,
-    "expectedDate" DATETIME NOT NULL,
+    "expectedDate" TIMESTAMP(3) NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'Draft',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );

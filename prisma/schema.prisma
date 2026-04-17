@@ -17,13 +17,22 @@ enum ProductType {
 model Order {
   id            Int         @id @default(autoincrement())
   title         String
-  sku           String
+  sku           String?
   productType   ProductType
   designName    String?
   blankType     String?
   itemQuantity  Int         @default(0)
-  expectedDate  DateTime
+  expectedDate  DateTime?
   status        String      @default("Draft")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  // T-Shirt size quantities:
+  qtySmall      Int?        @default(0)
+  qtyMedium     Int?        @default(0)
+  qtyLarge      Int?        @default(0)
+  qtyXL         Int?        @default(0)
+  qty2X         Int?        @default(0)
+  qty3X         Int?        @default(0)
+  qty4X         Int?        @default(0)
 }

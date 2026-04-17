@@ -13,7 +13,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const body = await request.json()
 
-  const { title, sku, qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, expectedDate } = body
+  const { title, sku, productType, designName, blankType, itemQuantity, expectedDate } = body
 
   if (!title || typeof title !== 'string' || title.trim() === '') {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -21,14 +21,23 @@ export async function POST(request: NextRequest) {
   if (!sku || typeof sku !== 'string' || sku.trim() === '') {
     return NextResponse.json({ error: 'SKU is required' }, { status: 400 })
   }
+  if (!productType || typeof productType !== 'string') {
+    return NextResponse.json({ error: 'Product type is required' }, { status: 400 })
+  }
   if (!expectedDate) {
     return NextResponse.json({ error: 'Expected date is required' }, { status: 400 })
   }
+  if (!Number.isInteger(itemQuantity) || (itemQuantity as number) < 1) {
+    return NextResponse.json({ error: 'Quantity must be a positive integer' }, { status: 400 })
+  }
 
-  const quantities = { qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X }
-  for (const [key, val] of Object.entries(quantities)) {
-    if (!Number.isInteger(val) || (val as number) < 0) {
-      return NextResponse.json({ error: `${key} must be a non-negative integer` }, { status: 400 })
+  // For T-shirts, designName and blankType are required
+  if (productType === 'TShirt') {
+    if (!designName || typeof designName !== 'string' || designName.trim() === '') {
+      return NextResponse.json({ error: 'Design name is required for T-shirts' }, { status: 400 })
+    }
+    if (!blankType || typeof blankType !== 'string' || blankType.trim() === '') {
+      return NextResponse.json({ error: 'Blank type is required for T-shirts' }, { status: 400 })
     }
   }
 
@@ -36,12 +45,10 @@ export async function POST(request: NextRequest) {
     data: {
       title: title.trim(),
       sku: sku.trim(),
-      qtySmall: qtySmall ?? 0,
-      qtyMedium: qtyMedium ?? 0,
-      qtyLarge: qtyLarge ?? 0,
-      qtyXL: qtyXL ?? 0,
-      qty2X: qty2X ?? 0,
-      qty3X: qty3X ?? 0,
+      productType,
+      designName: designName?.trim() || null,
+      blankType: blankType?.trim() || null,
+      itemQuantity: itemQuantity ?? 0,
       expectedDate: new Date(expectedDate),
       status: 'Draft',
     },

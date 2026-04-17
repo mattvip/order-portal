@@ -8,12 +8,10 @@ interface Order {
   id: number
   title: string
   sku: string
-  qtySmall: number
-  qtyMedium: number
-  qtyLarge: number
-  qtyXL: number
-  qty2X: number
-  qty3X: number
+  productType: string
+  designName?: string
+  blankType?: string
+  itemQuantity: number
   expectedDate: string
   status: string
   createdAt: string
@@ -68,15 +66,6 @@ export default function OrderDetailPage() {
   if (error && !order) return <main className="container"><div className="error-msg">{error}</div></main>
   if (!order) return <main className="container"><p>Order not found.</p></main>
 
-  const quantities = [
-    { label: 'Small', value: order.qtySmall },
-    { label: 'Medium', value: order.qtyMedium },
-    { label: 'Large', value: order.qtyLarge },
-    { label: 'XL', value: order.qtyXL },
-    { label: '2XL', value: order.qty2X },
-    { label: '3XL', value: order.qty3X },
-  ]
-
   return (
     <main className="container">
       <div className="page-header">
@@ -93,6 +82,10 @@ export default function OrderDetailPage() {
           <div className="detail-item">
             <label>SKU</label>
             <p>{order.sku}</p>
+          </div>
+          <div className="detail-item">
+            <label>Product Type</label>
+            <p>{order.productType}</p>
           </div>
           <div className="detail-item">
             <label>Status</label>
@@ -112,14 +105,30 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        <h2>Quantities</h2>
-        <div className="qty-grid" style={{ marginBottom: '1.5rem' }}>
-          {quantities.map(q => (
-            <div className="detail-item" key={q.label}>
-              <label>{q.label}</label>
-              <p>{q.value}</p>
+        <h2>Product Details</h2>
+        <div className="detail-grid" style={{ marginBottom: '1.5rem' }}>
+          {order.productType === 'TShirt' && (
+            <>
+              <div className="detail-item">
+                <label>Design Name</label>
+                <p>{order.designName}</p>
+              </div>
+              <div className="detail-item">
+                <label>Blank Type</label>
+                <p>{order.blankType}</p>
+              </div>
+            </>
+          )}
+          {(order.productType === 'Hat' || order.productType === 'Diecast') && order.blankType && (
+            <div className="detail-item">
+              <label>Blank Type</label>
+              <p>{order.blankType}</p>
             </div>
-          ))}
+          )}
+          <div className="detail-item">
+            <label>Quantity</label>
+            <p>{order.itemQuantity}</p>
+          </div>
         </div>
 
         {order.status === 'Draft' && (

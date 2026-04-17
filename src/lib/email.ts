@@ -5,10 +5,10 @@ interface Order {
   title: string
   sku: string
   productType: string
-  designName?: string
-  blankType?: string
+  designName?: string | null
+  blankType?: string | null
   itemQuantity: number
-  expectedDate: string
+  expectedDate: string | Date
   status: string
 }
 
@@ -43,6 +43,10 @@ export const sendOrderNotification = async (order: Order) => {
     `
   }
 
+  const expectedDate = order.expectedDate instanceof Date 
+    ? order.expectedDate.toLocaleDateString() 
+    : new Date(order.expectedDate).toLocaleDateString()
+
   const htmlContent = `
     <html>
       <body style="font-family: Arial, sans-serif;">
@@ -52,7 +56,7 @@ export const sendOrderNotification = async (order: Order) => {
           <tr><td><strong>Title</strong></td><td>${order.title}</td></tr>
           <tr><td><strong>SKU</strong></td><td>${order.sku}</td></tr>
           ${productDetails}
-          <tr><td><strong>Expected Delivery Date</strong></td><td>${new Date(order.expectedDate).toLocaleDateString()}</td></tr>
+          <tr><td><strong>Expected Delivery Date</strong></td><td>${expectedDate}</td></tr>
         </table>
       </body>
     </html>

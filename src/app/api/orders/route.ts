@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { ProductType } from '@prisma/client' // <-- import the enum type
 
 export const dynamic = 'force-dynamic'
 
@@ -41,21 +42,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
-const allowedTypes = ['TShirt', 'Hat', 'Diecast', 'Other'];
-const typeValue = allowedTypes.includes(productType) ? productType : 'Other';
+  // Validate and convert to ProductType enum
+  const allowedTypes = ['TShirt', 'Hat', 'Diecast', 'Other'] as const;
+  const typeValue: ProductType = allowedTypes.includes(productType as any)
+    ? productType as ProductType
+    : 'Other';
 
-const order = await prisma.order.create({
-  data: {
-    title: title.trim(),
-    sku: sku.trim(),
-    productType: typeValue, // enforce enum value
-    designName: designName?.trim() || null,
-    blankType: blankType?.trim() || null,
-    itemQuantity: itemQuantity ?? 0,
-    expectedDate: new Date(expectedDate),
-    status: 'Draft',
-  },
-})
+  const order = await prisma.order.create({
+    data: {
+      title: title.trim(),
+      sku: sku.trim(),
+      productType: typeValue,
+      designName: designName?.trim() || null,
+      blankType: blankType?.trim() || null,
+      itemQuantity: itemQuantity ?? 0,
+      expectedDate: new Date(expectedDate),
+      status: 'Draft',
+    },
+  })
 
   return NextResponse.json(order, { status: 201 })
 }

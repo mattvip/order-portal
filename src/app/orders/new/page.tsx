@@ -15,12 +15,23 @@ export default function NewOrderPage() {
     productType: 'TShirt',
     designName: '',
     blankType: '',
-    itemQuantity: '0',
     expectedDate: '',
+    itemQuantity: '0',
+
+    qtySmall: '0',
+    qtyMedium: '0',
+    qtyLarge: '0',
+    qtyXL: '0',
+    qty2X: '0',
+    qty3X: '0',
+    qty4X: '0',
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setForm(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -28,14 +39,26 @@ export default function NewOrderPage() {
     setError('')
     setSubmitting(true)
 
-    const body = {
+    // Prepare the body
+    const body: any = {
       title: form.title,
-      sku: form.sku,
       productType: form.productType,
       designName: form.designName,
-      blankType: form.blankType,
-      itemQuantity: parseInt(form.itemQuantity, 10),
-      expectedDate: form.expectedDate,
+      blankType: form.blankType || null,
+      sku: form.sku || null,
+      expectedDate: form.expectedDate || null,
+    }
+
+    if (form.productType === 'TShirt') {
+      body.qtySmall = parseInt(form.qtySmall) || 0
+      body.qtyMedium = parseInt(form.qtyMedium) || 0
+      body.qtyLarge = parseInt(form.qtyLarge) || 0
+      body.qtyXL = parseInt(form.qtyXL) || 0
+      body.qty2X = parseInt(form.qty2X) || 0
+      body.qty3X = parseInt(form.qty3X) || 0
+      body.qty4X = parseInt(form.qty4X) || 0
+    } else {
+      body.itemQuantity = parseInt(form.itemQuantity) || 0
     }
 
     const res = await fetch('/api/orders', {
@@ -55,6 +78,8 @@ export default function NewOrderPage() {
     router.push('/orders')
   }
 
+  const isTShirt = form.productType === 'TShirt'
+
   return (
     <main className="container">
       <div className="page-header">
@@ -70,8 +95,8 @@ export default function NewOrderPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="sku">SKU *</label>
-            <input id="sku" name="sku" type="text" value={form.sku} onChange={handleChange} placeholder="e.g. TSHRT-2024-001" required />
+            <label htmlFor="sku">SKU (Optional)</label>
+            <input id="sku" name="sku" type="text" value={form.sku} onChange={handleChange} placeholder="e.g. TSHRT-2024-001" />
           </div>
 
           <div className="form-group">
@@ -84,40 +109,73 @@ export default function NewOrderPage() {
             </select>
           </div>
 
-          {form.productType === 'TShirt' && (
+          {isTShirt && (
             <>
               <div className="form-group">
                 <label htmlFor="designName">Design Name *</label>
                 <input id="designName" name="designName" type="text" value={form.designName} onChange={handleChange} placeholder="e.g. Logo Design" required />
               </div>
-
               <div className="form-group">
-                <label htmlFor="blankType">Blank Type *</label>
-                <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} placeholder="e.g. Gildan 5000" required />
+                <label htmlFor="blankType">Blank Type (Optional)</label>
+                <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} placeholder="e.g. Gildan 5000" />
+              </div>
+              <div className="form-group">
+                <label>T-Shirt Quantities</label>
+                <div className="qty-grid">
+                  <div>
+                    <label>Small</label>
+                    <input name="qtySmall" type="number" min="0" value={form.qtySmall} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>Medium</label>
+                    <input name="qtyMedium" type="number" min="0" value={form.qtyMedium} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>Large</label>
+                    <input name="qtyLarge" type="number" min="0" value={form.qtyLarge} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>XL</label>
+                    <input name="qtyXL" type="number" min="0" value={form.qtyXL} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>2X</label>
+                    <input name="qty2X" type="number" min="0" value={form.qty2X} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>3X</label>
+                    <input name="qty3X" type="number" min="0" value={form.qty3X} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label>4X</label>
+                    <input name="qty4X" type="number" min="0" value={form.qty4X} onChange={handleChange} />
+                  </div>
+                </div>
               </div>
             </>
           )}
 
-          {(form.productType === 'Hat' || form.productType === 'Diecast') && (
-            <div className="form-group">
-              <label htmlFor="blankType">Blank Type</label>
-              <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} placeholder="e.g. 6-panel cap" />
-            </div>
+          {!isTShirt && (
+            <>
+              <div className="form-group">
+                <label htmlFor="blankType">Blank Type (Optional)</label>
+                <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} placeholder="e.g. 6-panel cap" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="itemQuantity">Quantity *</label>
+                <input id="itemQuantity" name="itemQuantity" type="number" min="1" value={form.itemQuantity} onChange={handleChange} />
+              </div>
+            </>
           )}
 
           <div className="form-group">
-            <label htmlFor="itemQuantity">Quantity *</label>
-            <input id="itemQuantity" name="itemQuantity" type="number" min="1" value={form.itemQuantity} onChange={handleChange} required />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="expectedDate">Expected Delivery Date *</label>
-            <input id="expectedDate" name="expectedDate" type="date" value={form.expectedDate} onChange={handleChange} required />
+            <label htmlFor="expectedDate">Expected Delivery Date (Optional)</label>
+            <input id="expectedDate" name="expectedDate" type="date" value={form.expectedDate} onChange={handleChange} />
           </div>
 
           <div className="btn-gap">
             <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create Order (Save as Draft)'}
+              {submitting ? 'Creating…' : 'Create Order'}
             </button>
           </div>
         </form>

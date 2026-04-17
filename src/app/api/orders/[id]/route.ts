@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendOrderNotification } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,6 +76,16 @@ export async function PATCH(
     where: { id },
     data: { status },
   })
+
+  // Send email notification when order is submitted
+  if (status === 'Submitted') {
+    try {
+      await sendOrderNotification(updated)
+    } catch (emailError) {
+      console.error('Failed to send order notification email:', emailError)
+      // Don't fail the order submission if email fails
+    }
+  }
 
   return NextResponse.json(updated)
 }

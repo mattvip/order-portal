@@ -3,13 +3,20 @@ import nodemailer from 'nodemailer'
 interface Order {
   id: number
   title: string
-  sku: string
+  sku: string | null
   productType: string
   designName?: string | null
   blankType?: string | null
   itemQuantity: number
-  expectedDate: string | Date
+  expectedDate: string | Date | null
   status: string
+  qtySmall?: number | null
+  qtyMedium?: number | null
+  qtyLarge?: number | null
+  qtyXL?: number | null
+  qty2X?: number | null
+  qty3X?: number | null
+  qty4X?: number | null
 }
 
 export const sendOrderNotification = async (order: Order) => {

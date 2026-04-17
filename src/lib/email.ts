@@ -50,9 +50,13 @@ export const sendOrderNotification = async (order: Order) => {
     `
   }
 
-  const expectedDate = order.expectedDate instanceof Date 
-    ? order.expectedDate.toLocaleDateString() 
-    : new Date(order.expectedDate).toLocaleDateString()
+let expectedDate = 'N/A'
+if (order.expectedDate) {
+  const dt = order.expectedDate instanceof Date
+    ? order.expectedDate
+    : new Date(order.expectedDate)
+  expectedDate = isNaN(dt.getTime()) ? 'N/A' : dt.toLocaleDateString()
+}
 
   const htmlContent = `
     <html>

@@ -41,18 +41,21 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const order = await prisma.order.create({
-    data: {
-      title: title.trim(),
-      sku: sku.trim(),
-      productType,
-      designName: designName?.trim() || null,
-      blankType: blankType?.trim() || null,
-      itemQuantity: itemQuantity ?? 0,
-      expectedDate: new Date(expectedDate),
-      status: 'Draft',
-    },
-  })
+const allowedTypes = ['TShirt', 'Hat', 'Diecast', 'Other'];
+const typeValue = allowedTypes.includes(productType) ? productType : 'Other';
+
+const order = await prisma.order.create({
+  data: {
+    title: title.trim(),
+    sku: sku.trim(),
+    productType: typeValue, // enforce enum value
+    designName: designName?.trim() || null,
+    blankType: blankType?.trim() || null,
+    itemQuantity: itemQuantity ?? 0,
+    expectedDate: new Date(expectedDate),
+    status: 'Draft',
+  },
+})
 
   return NextResponse.json(order, { status: 201 })
 }

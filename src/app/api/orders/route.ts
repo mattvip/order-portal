@@ -18,12 +18,14 @@ export async function POST(request: NextRequest) {
 
   const {
     title,
+    vendor,
     sku,
     productType,
     designName,
     blankType,
     expectedDate,
     itemQuantity,
+    notes,
     qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, qty4X,
   } = body
 
@@ -65,11 +67,13 @@ export async function POST(request: NextRequest) {
 
   const data: any = {
     title: title.trim(),
+    vendor: vendor?.trim() || null,
     sku: sku?.trim() || null,
     productType: typeValue,
     designName: designName?.trim() || null,
     blankType: blankType?.trim() || null,
     expectedDate: expectedDate ? new Date(expectedDate) : null,
+    notes: notes?.trim() || null,
     status: 'Draft',
   };
 

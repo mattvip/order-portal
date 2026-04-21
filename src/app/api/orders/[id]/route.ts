@@ -80,7 +80,17 @@ export async function PATCH(
   // Send email notification when order is submitted
   if (status === 'Submitted') {
     try {
-      await sendOrderNotification(updated)
+      await sendOrderNotification({
+  ...updated,
+  itemQuantity: updated.itemQuantity ?? 0,
+  qtySmall: updated.qtySmall ?? 0,
+  qtyMedium: updated.qtyMedium ?? 0,
+  qtyLarge: updated.qtyLarge ?? 0,
+  qtyXL: updated.qtyXL ?? 0,
+  qty2X: updated.qty2X ?? 0,
+  qty3X: updated.qty3X ?? 0,
+  qty4X: updated.qty4X ?? 0,
+});
     } catch (emailError) {
       console.error('Failed to send order notification email:', emailError)
       // Don't fail the order submission if email fails

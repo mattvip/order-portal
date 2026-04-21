@@ -4,6 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+const SIZE_FIELDS = [
+  { name: 'qtySmall', label: 'Small' },
+  { name: 'qtyMedium', label: 'Medium' },
+  { name: 'qtyLarge', label: 'Large' },
+  { name: 'qtyXL', label: 'XL' },
+  { name: 'qty2X', label: '2X' },
+  { name: 'qty3X', label: '3X' },
+  { name: 'qty4X', label: '4X' },
+]
+
+const SIZE_PRODUCT_TYPES = ['TShirt', 'Sweatshirt', 'Jacket']
+
 export default function NewOrderPage() {
   const router = useRouter()
   const [error, setError] = useState('')
@@ -16,6 +28,7 @@ export default function NewOrderPage() {
     designName: '',
     blankType: '',
     expectedDate: '',
+    itemQuantity: '0',
     qtySmall: '0',
     qtyMedium: '0',
     qtyLarge: '0',
@@ -44,13 +57,16 @@ export default function NewOrderPage() {
       designName: form.designName,
       blankType: form.blankType,
       expectedDate: form.expectedDate,
-      qtySmall: parseInt(form.qtySmall) || 0,
-      qtyMedium: parseInt(form.qtyMedium) || 0,
-      qtyLarge: parseInt(form.qtyLarge) || 0,
-      qtyXL: parseInt(form.qtyXL) || 0,
-      qty2X: parseInt(form.qty2X) || 0,
-      qty3X: parseInt(form.qty3X) || 0,
-      qty4X: parseInt(form.qty4X) || 0,
+    }
+
+    // For size-based product types, submit all size fields
+    if (SIZE_PRODUCT_TYPES.includes(form.productType)) {
+      SIZE_FIELDS.forEach(f => {
+        body[f.name] = parseInt(form[f.name as keyof typeof form] as string) || 0
+      })
+    } else {
+      // Generic quantity for other types
+      body.itemQuantity = parseInt(form.itemQuantity) || 0
     }
 
     const res = await fetch('/api/orders', {
@@ -70,6 +86,8 @@ export default function NewOrderPage() {
     router.push('/orders')
   }
 
+  const isSizeProduct = SIZE_PRODUCT_TYPES.includes(form.productType)
+
   return (
     <main className="container">
       <div className="page-header">
@@ -81,16 +99,18 @@ export default function NewOrderPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="title">Order Title *</label>
-            <input id="title" name="title" type="text" value={form.title} onChange={handleChange} placeholder="e.g. Spring Collection T-Shirts" required />
+            <input id="title" name="title" type="text" value={form.title} onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label htmlFor="sku">SKU (Optional)</label>
-            <input id="sku" name="sku" type="text" value={form.sku} onChange={handleChange} placeholder="e.g. TSHRT-2024-001" />
+            <input id="sku" name="sku" type="text" value={form.sku} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label htmlFor="productType">Product Type *</label>
             <select id="productType" name="productType" value={form.productType} onChange={handleChange} required>
               <option value="TShirt">T-Shirt</option>
+              <option value="Sweatshirt">Sweatshirt</option>
+              <option value="Jacket">Jacket</option>
               <option value="Hat">Hat</option>
               <option value="Diecast">Diecast</option>
               <option value="Other">Other</option>
@@ -98,45 +118,43 @@ export default function NewOrderPage() {
           </div>
           <div className="form-group">
             <label htmlFor="designName">Design Name *</label>
-            <input id="designName" name="designName" type="text" value={form.designName} onChange={handleChange} placeholder="e.g. Logo Design" required />
+            <input id="designName" name="designName" type="text" value={form.designName} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label htmlFor="blankType">Blank Type (Optional)</label>
-            <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} placeholder="e.g. Gildan 5000" />
+            <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} />
           </div>
-          <div className="form-group">
-            <label>T-Shirt Quantities</label>
-            <div className="qty-grid">
-              <div>
-                <label>Small</label>
-                <input name="qtySmall" type="number" min="0" value={form.qtySmall} onChange={handleChange} />
-              </div>
-              <div>
-                <label>Medium</label>
-                <input name="qtyMedium" type="number" min="0" value={form.qtyMedium} onChange={handleChange} />
-              </div>
-              <div>
-                <label>Large</label>
-                <input name="qtyLarge" type="number" min="0" value={form.qtyLarge} onChange={handleChange} />
-              </div>
-              <div>
-                <label>XL</label>
-                <input name="qtyXL" type="number" min="0" value={form.qtyXL} onChange={handleChange} />
-              </div>
-              <div>
-                <label>2X</label>
-                <input name="qty2X" type="number" min="0" value={form.qty2X} onChange={handleChange} />
-              </div>
-              <div>
-                <label>3X</label>
-                <input name="qty3X" type="number" min="0" value={form.qty3X} onChange={handleChange} />
-              </div>
-              <div>
-                <label>4X</label>
-                <input name="qty4X" type="number" min="0" value={form.qty4X} onChange={handleChange} />
+          {isSizeProduct ? (
+            <div className="form-group">
+              <label>Quantities by Size</label>
+              <div className="qty-grid">
+                {SIZE_FIELDS.map(f => (
+                  <div key={f.name}>
+                    <label>{f.label}</label>
+                    <input
+                      name={f.name}
+                      type="number"
+                      min="0"
+                      value={form[f.name as keyof typeof form]}
+                      onChange={handleChange}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="form-group">
+              <label htmlFor="itemQuantity">Quantity *</label>
+              <input
+                id="itemQuantity"
+                name="itemQuantity"
+                type="number"
+                min="1"
+                value={form.itemQuantity}
+                onChange={handleChange}
+              />
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="expectedDate">Expected Delivery Date (Optional)</label>
             <input id="expectedDate" name="expectedDate" type="date" value={form.expectedDate} onChange={handleChange} />

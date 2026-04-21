@@ -23,6 +23,7 @@ export default function NewOrderPage() {
 
   const [form, setForm] = useState({
     title: '',
+    vendor: '',            // new: vendor
     sku: '',
     productType: 'TShirt',
     designName: '',
@@ -36,9 +37,10 @@ export default function NewOrderPage() {
     qty2X: '0',
     qty3X: '0',
     qty4X: '0',
+    notes: '',             // new: notes
   })
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -52,11 +54,13 @@ export default function NewOrderPage() {
 
     const body: any = {
       title: form.title,
+      vendor: form.vendor,
       sku: form.sku,
       productType: form.productType,
       designName: form.designName,
       blankType: form.blankType,
       expectedDate: form.expectedDate,
+      notes: form.notes,
     }
 
     // For size-based product types, submit all size fields
@@ -100,6 +104,17 @@ export default function NewOrderPage() {
           <div className="form-group">
             <label htmlFor="title">Order Title *</label>
             <input id="title" name="title" type="text" value={form.title} onChange={handleChange} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="vendor">Vendor (Optional)</label>
+            <input
+              id="vendor"
+              name="vendor"
+              type="text"
+              value={form.vendor}
+              onChange={handleChange}
+              placeholder="Who is the manufacturer?"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="sku">SKU (Optional)</label>
@@ -159,13 +174,6 @@ export default function NewOrderPage() {
             <label htmlFor="expectedDate">Expected Delivery Date (Optional)</label>
             <input id="expectedDate" name="expectedDate" type="date" value={form.expectedDate} onChange={handleChange} />
           </div>
-          <div className="btn-gap">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create Order'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </main>
-  )
-}
+          <div className="form-group">
+            <label htmlFor="notes">Notes*
+

@@ -23,7 +23,7 @@ export default function NewOrderPage() {
 
   const [form, setForm] = useState({
     title: '',
-    vendor: '',            // new: vendor
+    vendor: '',
     sku: '',
     productType: 'TShirt',
     designName: '',
@@ -37,10 +37,12 @@ export default function NewOrderPage() {
     qty2X: '0',
     qty3X: '0',
     qty4X: '0',
-    notes: '',             // new: notes
+    notes: '',
   })
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) {
     setForm(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -63,13 +65,11 @@ export default function NewOrderPage() {
       notes: form.notes,
     }
 
-    // For size-based product types, submit all size fields
     if (SIZE_PRODUCT_TYPES.includes(form.productType)) {
       SIZE_FIELDS.forEach(f => {
         body[f.name] = parseInt(form[f.name as keyof typeof form] as string) || 0
       })
     } else {
-      // Generic quantity for other types
       body.itemQuantity = parseInt(form.itemQuantity) || 0
     }
 
@@ -122,7 +122,13 @@ export default function NewOrderPage() {
           </div>
           <div className="form-group">
             <label htmlFor="productType">Product Type *</label>
-            <select id="productType" name="productType" value={form.productType} onChange={handleChange} required>
+            <select
+              id="productType"
+              name="productType"
+              value={form.productType}
+              onChange={handleChange}
+              required
+            >
               <option value="TShirt">T-Shirt</option>
               <option value="Sweatshirt">Sweatshirt</option>
               <option value="Jacket">Jacket</option>
@@ -172,8 +178,32 @@ export default function NewOrderPage() {
           )}
           <div className="form-group">
             <label htmlFor="expectedDate">Expected Delivery Date (Optional)</label>
-            <input id="expectedDate" name="expectedDate" type="date" value={form.expectedDate} onChange={handleChange} />
+            <input
+              id="expectedDate"
+              name="expectedDate"
+              type="date"
+              value={form.expectedDate}
+              onChange={handleChange}
+            />
           </div>
           <div className="form-group">
-            <label htmlFor="notes">Notes*
-
+            <label htmlFor="notes">Notes (Optional)</label>
+            <textarea
+              id="notes"
+              name="notes"
+              value={form.notes}
+              onChange={handleChange}
+              placeholder="General notes about this order"
+              rows={3}
+            />
+          </div>
+          <div className="btn-gap">
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Create Order'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  )
+}

@@ -51,30 +51,39 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const allowedTypes = ['TShirt', 'Hat', 'Diecast', 'Other'] as const;
-  const typeValue: ProductType = allowedTypes.includes(productType as any)
-    ? productType as ProductType
-    : 'Other';
+  const SIZE_PRODUCT_TYPES = ['TShirt', 'Sweatshirt', 'Jacket'] as const;
+const typeValue: ProductType = allowedTypes.includes(productType as any)
+  ? productType as ProductType
+  : 'Other';
 
-  const order = await prisma.order.create({
-    data: {
-      title: title.trim(),
-      sku: sku?.trim() || null,
-      productType: typeValue,
-      designName: designName?.trim() || null,
-      blankType: blankType?.trim() || null,
-      expectedDate: expectedDate ? new Date(expectedDate) : null,
-      itemQuantity: typeValue === 'TShirt' ? 0 : (itemQuantity ?? 0),
-      qtySmall: typeValue === 'TShirt' ? (Number.isInteger(qtySmall) ? qtySmall : 0) : null,
-      qtyMedium: typeValue === 'TShirt' ? (Number.isInteger(qtyMedium) ? qtyMedium : 0) : null,
-      qtyLarge: typeValue === 'TShirt' ? (Number.isInteger(qtyLarge) ? qtyLarge : 0) : null,
-      qtyXL: typeValue === 'TShirt' ? (Number.isInteger(qtyXL) ? qtyXL : 0) : null,
-      qty2X: typeValue === 'TShirt' ? (Number.isInteger(qty2X) ? qty2X : 0) : null,
-      qty3X: typeValue === 'TShirt' ? (Number.isInteger(qty3X) ? qty3X : 0) : null,
-      qty4X: typeValue === 'TShirt' ? (Number.isInteger(qty4X) ? qty4X : 0) : null,
-      status: 'Draft',
-    },
-  })
+const data: any = {
+  title: title.trim(),
+  sku: sku?.trim() || null,
+  productType: typeValue,
+  designName: designName?.trim() || null,
+  blankType: blankType?.trim() || null,
+  expectedDate: expectedDate ? new Date(expectedDate) : null,
+  status: 'Draft',
+};
 
-  return NextResponse.json(order, { status: 201 })
+if (SIZE_PRODUCT_TYPES.includes(typeValue)) {
+  data.itemQuantity = 0;
+  data.qtySmall = Number.isInteger(qtySmall) ? qtySmall : 0;
+  data.qtyMedium = Number.isInteger(qtyMedium) ? qtyMedium : 0;
+  data.qtyLarge = Number.isInteger(qtyLarge) ? qtyLarge : 0;
+  data.qtyXL = Number.isInteger(qtyXL) ? qtyXL : 0;
+  data.qty2X = Number.isInteger(qty2X) ? qty2X : 0;
+  data.qty3X = Number.isInteger(qty3X) ? qty3X : 0;
+  data.qty4X = Number.isInteger(qty4X) ? qty4X : 0;
+} else {
+  data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
+  data.qtySmall = null;
+  data.qtyMedium = null;
+  data.qtyLarge = null;
+  data.qtyXL = null;
+  data.qty2X = null;
+  data.qty3X = null;
+  data.qty4X = null;
 }
+
+const order = await prisma.order.create({ data });

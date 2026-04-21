@@ -9,6 +9,8 @@ datasource db {
 
 enum ProductType {
   TShirt
+  Sweatshirt
+  Jacket
   Hat
   Diecast
   Other
@@ -21,13 +23,12 @@ model Order {
   productType   ProductType
   designName    String?
   blankType     String?
-  itemQuantity  Int         @default(0)
+  itemQuantity  Int?        @default(0)
   expectedDate  DateTime?
   status        String      @default("Draft")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  // T-Shirt size quantities:
   qtySmall      Int?        @default(0)
   qtyMedium     Int?        @default(0)
   qtyLarge      Int?        @default(0)

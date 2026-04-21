@@ -52,40 +52,41 @@ export async function POST(request: NextRequest) {
   }
 
   const allowedTypes = ['TShirt', 'Sweatshirt', 'Jacket', 'Hat', 'Diecast', 'Other'] as const;
-  const SIZE_PRODUCT_TYPES = ['TShirt', 'Sweatshirt', 'Jacket'] as const;
-  const typeValue: ProductType = allowedTypes.includes(productType as any)
-    ? productType as ProductType
-    : 'Other';
+const SIZE_PRODUCT_TYPES = [ProductType.TShirt, ProductType.Sweatshirt, ProductType.Jacket]; // <- use enums
 
-  const data: any = {
-    title: title.trim(),
-    sku: sku?.trim() || null,
-    productType: typeValue,
-    designName: designName?.trim() || null,
-    blankType: blankType?.trim() || null,
-    expectedDate: expectedDate ? new Date(expectedDate) : null,
-    status: 'Draft',
-  };
+const typeValue: ProductType = allowedTypes.includes(productType as any)
+  ? productType as ProductType
+  : 'Other';
 
-  if (SIZE_PRODUCT_TYPES.includes(typeValue)) {
-    data.itemQuantity = 0;
-    data.qtySmall = Number.isInteger(qtySmall) ? qtySmall : 0;
-    data.qtyMedium = Number.isInteger(qtyMedium) ? qtyMedium : 0;
-    data.qtyLarge = Number.isInteger(qtyLarge) ? qtyLarge : 0;
-    data.qtyXL = Number.isInteger(qtyXL) ? qtyXL : 0;
-    data.qty2X = Number.isInteger(qty2X) ? qty2X : 0;
-    data.qty3X = Number.isInteger(qty3X) ? qty3X : 0;
-    data.qty4X = Number.isInteger(qty4X) ? qty4X : 0;
-  } else {
-    data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
-    data.qtySmall = null;
-    data.qtyMedium = null;
-    data.qtyLarge = null;
-    data.qtyXL = null;
-    data.qty2X = null;
-    data.qty3X = null;
-    data.qty4X = null;
-  }
+const data: any = {
+  title: title.trim(),
+  sku: sku?.trim() || null,
+  productType: typeValue,
+  designName: designName?.trim() || null,
+  blankType: blankType?.trim() || null,
+  expectedDate: expectedDate ? new Date(expectedDate) : null,
+  status: 'Draft',
+};
+
+if (SIZE_PRODUCT_TYPES.includes(typeValue)) { // NO error now!
+  data.itemQuantity = 0;
+  data.qtySmall = Number.isInteger(qtySmall) ? qtySmall : 0;
+  data.qtyMedium = Number.isInteger(qtyMedium) ? qtyMedium : 0;
+  data.qtyLarge = Number.isInteger(qtyLarge) ? qtyLarge : 0;
+  data.qtyXL = Number.isInteger(qtyXL) ? qtyXL : 0;
+  data.qty2X = Number.isInteger(qty2X) ? qty2X : 0;
+  data.qty3X = Number.isInteger(qty3X) ? qty3X : 0;
+  data.qty4X = Number.isInteger(qty4X) ? qty4X : 0;
+} else {
+  data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
+  data.qtySmall = null;
+  data.qtyMedium = null;
+  data.qtyLarge = null;
+  data.qtyXL = null;
+  data.qty2X = null;
+  data.qty3X = null;
+  data.qty4X = null;
+}
 
   const order = await prisma.order.create({ data });
 

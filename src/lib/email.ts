@@ -30,12 +30,27 @@ export const sendOrderNotification = async (order: Order) => {
 
   // Build email body based on product type
   let productDetails = ''
-  
+
   if (order.productType === 'TShirt') {
+    const sizes = [
+      { label: 'Small', value: order.qtySmall },
+      { label: 'Medium', value: order.qtyMedium },
+      { label: 'Large', value: order.qtyLarge },
+      { label: 'XL', value: order.qtyXL },
+      { label: '2XL', value: order.qty2X },
+      { label: '3XL', value: order.qty3X },
+      { label: '4XL', value: order.qty4X },
+    ]
+    // Only show sizes with a positive value
+    const sizeRows = sizes
+      .filter(s => s.value && s.value > 0)
+      .map(s => `<tr><td><strong>${s.label}</strong></td><td>${s.value}</td></tr>`)
+      .join('')
     productDetails = `
       <tr><td><strong>Design Name</strong></td><td>${order.designName || 'N/A'}</td></tr>
       <tr><td><strong>Blank Type</strong></td><td>${order.blankType || 'N/A'}</td></tr>
-      <tr><td><strong>Quantity</strong></td><td>${order.itemQuantity}</td></tr>
+      <tr><td><strong>Total Quantity</strong></td><td>${order.itemQuantity}</td></tr>
+      ${sizeRows}
     `
   } else if (['Hat', 'Diecast'].includes(order.productType)) {
     productDetails = `
@@ -50,13 +65,13 @@ export const sendOrderNotification = async (order: Order) => {
     `
   }
 
-let expectedDate = 'N/A'
-if (order.expectedDate) {
-  const dt = order.expectedDate instanceof Date
-    ? order.expectedDate
-    : new Date(order.expectedDate)
-  expectedDate = isNaN(dt.getTime()) ? 'N/A' : dt.toLocaleDateString()
-}
+  let expectedDate = 'N/A'
+  if (order.expectedDate) {
+    const dt = order.expectedDate instanceof Date
+      ? order.expectedDate
+      : new Date(order.expectedDate)
+    expectedDate = isNaN(dt.getTime()) ? 'N/A' : dt.toLocaleDateString()
+  }
 
   const htmlContent = `
     <html>

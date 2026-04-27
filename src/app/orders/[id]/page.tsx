@@ -16,6 +16,13 @@ interface Order {
   status: string
   createdAt: string
   updatedAt: string
+  qtySmall?: number
+  qtyMedium?: number
+  qtyLarge?: number
+  qtyXL?: number
+  qty2X?: number
+  qty3X?: number
+  qty4X?: number
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -62,15 +69,32 @@ export default function OrderDetailPage() {
     }
   }
 
-  if (loading) return <main className="container"><p>Loading…</p></main>
-  if (error && !order) return <main className="container"><div className="error-msg">{error}</div></main>
-  if (!order) return <main className="container"><p>Order not found.</p></main>
+  if (loading)
+    return (
+      <main className="container">
+        <p>Loading…</p>
+      </main>
+    )
+  if (error && !order)
+    return (
+      <main className="container">
+        <div className="error-msg">{error}</div>
+      </main>
+    )
+  if (!order)
+    return (
+      <main className="container">
+        <p>Order not found.</p>
+      </main>
+    )
 
   return (
     <main className="container">
       <div className="page-header">
         <h1>Order #{order.id}</h1>
-        <Link href="/orders" className="btn btn-secondary">← Back to Orders</Link>
+        <Link href="/orders" className="btn btn-secondary">
+          ← Back to Orders
+        </Link>
       </div>
       {error && <div className="error-msg">{error}</div>}
       <div className="card">
@@ -89,7 +113,9 @@ export default function OrderDetailPage() {
           </div>
           <div className="detail-item">
             <label>Status</label>
-            <p><StatusBadge status={order.status} /></p>
+            <p>
+              <StatusBadge status={order.status} />
+            </p>
           </div>
           <div className="detail-item">
             <label>Expected Date</label>
@@ -126,35 +152,50 @@ export default function OrderDetailPage() {
             </div>
           )}
           <div className="detail-item">
-  <label>Quantity</label>
-  <p>{order.itemQuantity}</p>
-</div>
-{order.productType === 'TShirt' && (
-  <div className="detail-item">
-    <label>Size Breakdown</label>
-    <ul style={{ margin: 0, paddingLeft: 18 }}>
-      {order.qtySmall > 0 && <li>Small: {order.qtySmall}</li>}
-      {order.qtyMedium > 0 && <li>Medium: {order.qtyMedium}</li>}
-      {order.qtyLarge > 0 && <li>Large: {order.qtyLarge}</li>}
-      {order.qtyXL > 0 && <li>XL: {order.qtyXL}</li>}
-      {order.qty2X > 0 && <li>2XL: {order.qty2X}</li>}
-      {order.qty3X > 0 && <li>3XL: {order.qty3X}</li>}
-      {order.qty4X > 0 && <li>4XL: {order.qty4X}</li>}
-    </ul>
-  </div>
-)}
-
-        {order.status === 'Draft' && (
-          <div className="btn-gap">
-            <button
-              className="btn btn-primary"
-              onClick={handleSubmitOrder}
-              disabled={submitting}
-            >
-              {submitting ? 'Submitting…' : 'Submit Order'}
-            </button>
+            <label>Quantity</label>
+            <p>{order.itemQuantity}</p>
           </div>
-        )}
+          {order.productType === 'TShirt' && (
+            <div className="detail-item">
+              <label>Size Breakdown</label>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {order.qtySmall && order.qtySmall > 0 && (
+                  <li>Small: {order.qtySmall}</li>
+                )}
+                {order.qtyMedium && order.qtyMedium > 0 && (
+                  <li>Medium: {order.qtyMedium}</li>
+                )}
+                {order.qtyLarge && order.qtyLarge > 0 && (
+                  <li>Large: {order.qtyLarge}</li>
+                )}
+                {order.qtyXL && order.qtyXL > 0 && (
+                  <li>XL: {order.qtyXL}</li>
+                )}
+                {order.qty2X && order.qty2X > 0 && (
+                  <li>2XL: {order.qty2X}</li>
+                )}
+                {order.qty3X && order.qty3X > 0 && (
+                  <li>3XL: {order.qty3X}</li>
+                )}
+                {order.qty4X && order.qty4X > 0 && (
+                  <li>4XL: {order.qty4X}</li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {order.status === 'Draft' && (
+            <div className="btn-gap">
+              <button
+                className="btn btn-primary"
+                onClick={handleSubmitOrder}
+                disabled={submitting}
+              >
+                {submitting ? 'Submitting…' : 'Submit Order'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   )

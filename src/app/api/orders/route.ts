@@ -82,14 +82,23 @@ export async function POST(request: NextRequest) {
     typeValue === ProductType.Sweatshirt ||
     typeValue === ProductType.Jacket
   ) {
-    data.itemQuantity = 0;
-    data.qtySmall = Number.isInteger(qtySmall) ? qtySmall : 0;
-    data.qtyMedium = Number.isInteger(qtyMedium) ? qtyMedium : 0;
-    data.qtyLarge = Number.isInteger(qtyLarge) ? qtyLarge : 0;
-    data.qtyXL = Number.isInteger(qtyXL) ? qtyXL : 0;
-    data.qty2X = Number.isInteger(qty2X) ? qty2X : 0;
-    data.qty3X = Number.isInteger(qty3X) ? qty3X : 0;
-    data.qty4X = Number.isInteger(qty4X) ? qty4X : 0;
+    const sizeQuantities = [
+      Number.isInteger(qtySmall) ? qtySmall : 0,
+      Number.isInteger(qtyMedium) ? qtyMedium : 0,
+      Number.isInteger(qtyLarge) ? qtyLarge : 0,
+      Number.isInteger(qtyXL) ? qtyXL : 0,
+      Number.isInteger(qty2X) ? qty2X : 0,
+      Number.isInteger(qty3X) ? qty3X : 0,
+      Number.isInteger(qty4X) ? qty4X : 0,
+    ];
+    data.itemQuantity = sizeQuantities.reduce((a, b) => a + b, 0);
+    data.qtySmall = sizeQuantities[0];
+    data.qtyMedium = sizeQuantities[1];
+    data.qtyLarge = sizeQuantities[2];
+    data.qtyXL = sizeQuantities[3];
+    data.qty2X = sizeQuantities[4];
+    data.qty3X = sizeQuantities[5];
+    data.qty4X = sizeQuantities[6];
   } else {
     data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
     data.qtySmall = null;

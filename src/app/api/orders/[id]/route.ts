@@ -1,101 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendOrderNotification } from '@/lib/email'
+import { ProductType } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-const VALID_STATUSES = ['Draft', 'Submitted', 'Accepted', 'In Production', 'Completed', 'Rejected']
-
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id: rawId } = await params
-  const id = parseInt(rawId, 10)
-  if (isNaN(id)) {
-    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
-  }
-  const order = await prisma.order.findUnique({ where: { id } })
-  if (!order) {
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-  }
-  return NextResponse.json(order)
+// --- GET handler: Lists orders ---
+export async function GET() {
+  const orders = await prisma.order.findMany({
+    orderBy: { createdAt: 'desc' },
+  })
+  return NextResponse.json(orders)
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id: rawId } = await params
-  const id = parseInt(rawId, 10)
-  if (isNaN(id)) {
-    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
-  }
-
-  const order = await prisma.order.findUnique({ where: { id } })
-  if (!order) {
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-  }
-
+// --- POST handler: Creates a new order ---
+export async function POST(request: NextRequest) {
   const body = await request.json()
-  const { status } = body
 
-  if (!status || !VALID_STATUSES.includes(status)) {
-    return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
-  }
+  const {
+    title,
+    vendor,
+    sku,
+    productType,
+    designName,
+    blankType,
+    expectedDate,
+    itemQuantity,
+    notes,
+    qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, qty4X,
+  } = body
 
-  // Buyer: Draft -> Submitted
-  if (status === 'Submitted') {
-    if (order.status !== 'Draft') {
-      return NextResponse.json({ error: 'Only Draft orders can be submitted' }, { status: 422 })
-    }
+  if (!title || typeof title !== 'string' || title.trim() === '') {
+    return NextResponse.json({ error: 'Title is required' }, { status: 400 })
   }
-  // Manufacturer: Submitted -> Accepted or Rejected
-  else if (status === 'Accepted' || status === 'Rejected') {
-    if (order.status !== 'Submitted') {
-      return NextResponse.json({ error: 'Can only accept or reject Submitted orders' }, { status: 422 })
-    }
-  }
-  // Manufacturer: Accepted -> In Production
-  else if (status === 'In Production') {
-    if (order.status !== 'Accepted') {
-      return NextResponse.json({ error: 'Order must be Accepted before moving to In Production' }, { status: 422 })
-    }
-  }
-  // Manufacturer: In Production -> Completed
-  else if (status === 'Completed') {
-    if (order.status !== 'In Production') {
-      return NextResponse.json({ error: 'Order must be In Production before marking Completed' }, { status: 422 })
-    }
-  }
-  else {
-    return NextResponse.json({ error: 'Invalid status transition' }, { status: 422 })
+  if (!productType || typeof productType !== 'string') {
+    return NextResponse.json({ error: 'Product type is required' }, { status: 400 })
   }
 
-  const updated = await prisma.order.update({
-    where: { id },
-    data: { status },
-  })
-
-  // Send email notification when order is submitted
-  if (status === 'Submitted') {
-    try {
-      await sendOrderNotification({
-  ...updated,
-  itemQuantity: updated.itemQuantity ?? 0,
-  qtySmall: updated.qtySmall ?? 0,
-  qtyMedium: updated.qtyMedium ?? 0,
-  qtyLarge: updated.qtyLarge ?? 0,
-  qtyXL: updated.qtyXL ?? 0,
-  qty2X: updated.qty2X ?? 0,
-  qty3X: updated.qty3X ?? 0,
-  qty4X: updated.qty4X ?? 0,
-});
-    } catch (emailError) {
-      console.error('Failed to send order notification email:', emailError)
-      // Don't fail the order submission if email fails
+  // For T-shirts, Sweatshirts, Jackets, designName is required
+  if (
+    productType === 'TShirt' ||
+    productType === 'Sweatshirt' ||
+    productType === 'Jacket'
+  ) {
+    if (!designName || typeof designName !== 'string' || designName.trim() === '') {
+      return NextResponse.json({ error: 'Design name is required for garment orders' }, { status: 400 })
+    }
+    // At least one garment quantity must be > 0
+    const sizes = [qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, qty4X].map(
+      q => Number.isInteger(q) ? q : 0
+    );
+    if (sizes.every(q => q <= 0)) {
+      return NextResponse.json({ error: 'At least one size must have a quantity > 0' }, { status: 400 })
+    }
+  } else {
+    // For other product types, require itemQuantity
+    if (!Number.isInteger(itemQuantity) || itemQuantity < 1) {
+      return NextResponse.json({ error: 'Quantity must be a positive integer' }, { status: 400 })
     }
   }
 
-  return NextResponse.json(updated)
+  const allowedTypes = ['TShirt', 'Sweatshirt', 'Jacket', 'Hat', 'Diecast', 'Other'] as const;
+
+  const typeValue: ProductType = allowedTypes.includes(productType as any)
+    ? productType as ProductType
+    : 'Other';
+
+  const data: any = {
+    title: title.trim(),
+    vendor: vendor?.trim() || null,
+    sku: sku?.trim() || null,
+    productType: typeValue,
+    designName: designName?.trim() || null,
+    blankType: blankType?.trim() || null,
+    expectedDate: expectedDate ? new Date(expectedDate) : null,
+    notes: notes?.trim() || null,
+    status: 'Draft',
+  };
+
+  // --- FIXED SECTION ---
+  if (
+    typeValue === ProductType.TShirt ||
+    typeValue === ProductType.Sweatshirt ||
+    typeValue === ProductType.Jacket
+  ) {
+    // Calculate itemQuantity as the sum of all size fields
+    const sizeQuantities = [
+      Number.isInteger(qtySmall) ? qtySmall : 0,
+      Number.isInteger(qtyMedium) ? qtyMedium : 0,
+      Number.isInteger(qtyLarge) ? qtyLarge : 0,
+      Number.isInteger(qtyXL) ? qtyXL : 0,
+      Number.isInteger(qty2X) ? qty2X : 0,
+      Number.isInteger(qty3X) ? qty3X : 0,
+      Number.isInteger(qty4X) ? qty4X : 0,
+    ];
+    data.itemQuantity = sizeQuantities.reduce((a, b) => a + b, 0);
+    data.qtySmall = sizeQuantities[0];
+    data.qtyMedium = sizeQuantities[1];
+    data.qtyLarge = sizeQuantities[2];
+    data.qtyXL = sizeQuantities[3];
+    data.qty2X = sizeQuantities[4];
+    data.qty3X = sizeQuantities[5];
+    data.qty4X = sizeQuantities[6];
+  } else {
+    data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
+    data.qtySmall = null;
+    data.qtyMedium = null;
+    data.qtyLarge = null;
+    data.qtyXL = null;
+    data.qty2X = null;
+    data.qty3X = null;
+    data.qty4X = null;
+  }
+  // --- END FIXED SECTION ---
+
+  const order = await prisma.order.create({ data });
+
+  return NextResponse.json(order, { status: 201 });
 }

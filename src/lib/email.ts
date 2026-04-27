@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer'
 interface Order {
   id: number
   title: string
+  vendor?: string | null
   sku: string | null
   productType: string
   designName?: string | null
@@ -17,6 +18,7 @@ interface Order {
   qty2X?: number | null
   qty3X?: number | null
   qty4X?: number | null
+  notes?: string | null
 }
 
 export const sendOrderNotification = async (order: Order) => {
@@ -80,9 +82,11 @@ export const sendOrderNotification = async (order: Order) => {
         <table border="1" cellpadding="10" style="border-collapse: collapse;">
           <tr><td><strong>Order ID</strong></td><td>#${order.id}</td></tr>
           <tr><td><strong>Title</strong></td><td>${order.title}</td></tr>
+          <tr><td><strong>Vendor</strong></td><td>${order.vendor || 'N/A'}</td></tr>
           <tr><td><strong>SKU</strong></td><td>${order.sku}</td></tr>
           ${productDetails}
           <tr><td><strong>Expected Delivery Date</strong></td><td>${expectedDate}</td></tr>
+          <tr><td><strong>Notes</strong></td><td>${order.notes ? order.notes : 'N/A'}</td></tr>
         </table>
       </body>
     </html>

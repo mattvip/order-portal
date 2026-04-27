@@ -73,6 +73,8 @@ export default function NewOrderPage() {
       body.itemQuantity = parseInt(form.itemQuantity) || 0
     }
 
+    console.log('ORDER SUBMISSION PAYLOAD:', body)
+    
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

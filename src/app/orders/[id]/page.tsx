@@ -126,10 +126,23 @@ export default function OrderDetailPage() {
             </div>
           )}
           <div className="detail-item">
-            <label>Quantity</label>
-            <p>{order.itemQuantity}</p>
-          </div>
-        </div>
+  <label>Quantity</label>
+  <p>{order.itemQuantity}</p>
+</div>
+{order.productType === 'TShirt' && (
+  <div className="detail-item">
+    <label>Size Breakdown</label>
+    <ul style={{ margin: 0, paddingLeft: 18 }}>
+      {order.qtySmall > 0 && <li>Small: {order.qtySmall}</li>}
+      {order.qtyMedium > 0 && <li>Medium: {order.qtyMedium}</li>}
+      {order.qtyLarge > 0 && <li>Large: {order.qtyLarge}</li>}
+      {order.qtyXL > 0 && <li>XL: {order.qtyXL}</li>}
+      {order.qty2X > 0 && <li>2XL: {order.qty2X}</li>}
+      {order.qty3X > 0 && <li>3XL: {order.qty3X}</li>}
+      {order.qty4X > 0 && <li>4XL: {order.qty4X}</li>}
+    </ul>
+  </div>
+)}
 
         {order.status === 'Draft' && (
           <div className="btn-gap">

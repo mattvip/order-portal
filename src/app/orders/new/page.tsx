@@ -54,6 +54,9 @@ export default function NewOrderPage() {
     setError('')
     setSubmitting(true)
 
+    // ---> Debug log to confirm the handler is firing
+    console.log("HANDLE SUBMIT FIRED")
+
     const body: any = {
       title: form.title,
       vendor: form.vendor,
@@ -67,14 +70,15 @@ export default function NewOrderPage() {
 
     if (SIZE_PRODUCT_TYPES.includes(form.productType)) {
       SIZE_FIELDS.forEach(f => {
-        body[f.name] = parseInt(form[f.name as keyof typeof form] as string) || 0
+        body[f.name] = parseInt(form[f.name as keyof typeof form] as string, 10) || 0
       })
     } else {
-      body.itemQuantity = parseInt(form.itemQuantity) || 0
+      body.itemQuantity = parseInt(form.itemQuantity, 10) || 0
     }
 
+    // ---> Debug log to see the exact payload sent to backend
     console.log('ORDER SUBMISSION PAYLOAD:', body)
-    
+
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

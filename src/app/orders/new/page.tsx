@@ -67,10 +67,10 @@ export default function NewOrderPage() {
 
     if (SIZE_PRODUCT_TYPES.includes(form.productType)) {
       SIZE_FIELDS.forEach(f => {
-        body[f.name] = parseInt(form[f.name as keyof typeof form] as string, 10) || 0
+        body[f.name] = parseInt(form[f.name as keyof typeof form] ?? "0", 10) || 0
       })
     } else {
-      body.itemQuantity = parseInt(form.itemQuantity, 10) || 0
+      body.itemQuantity = parseInt(form.itemQuantity ?? "0", 10) || 0
     }
 
     const res = await fetch('/api/orders', {
@@ -103,7 +103,7 @@ export default function NewOrderPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="title">Order Title *</label>
-            <input id="title" name="title" type="text" value={form.title} onChange={handleChange} required />
+            <input id="title" name="title" type="text" value={form.title ?? ""} onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label htmlFor="vendor">Vendor (Optional)</label>
@@ -111,21 +111,21 @@ export default function NewOrderPage() {
               id="vendor"
               name="vendor"
               type="text"
-              value={form.vendor}
+              value={form.vendor ?? ""}
               onChange={handleChange}
               placeholder="Who is the manufacturer?"
             />
           </div>
           <div className="form-group">
             <label htmlFor="sku">SKU (Optional)</label>
-            <input id="sku" name="sku" type="text" value={form.sku} onChange={handleChange} />
+            <input id="sku" name="sku" type="text" value={form.sku ?? ""} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label htmlFor="productType">Product Type *</label>
             <select
               id="productType"
               name="productType"
-              value={form.productType}
+              value={form.productType ?? ""}
               onChange={handleChange}
               required
             >
@@ -139,11 +139,11 @@ export default function NewOrderPage() {
           </div>
           <div className="form-group">
             <label htmlFor="designName">Design Name *</label>
-            <input id="designName" name="designName" type="text" value={form.designName} onChange={handleChange} />
+            <input id="designName" name="designName" type="text" value={form.designName ?? ""} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label htmlFor="blankType">Blank Type (Optional)</label>
-            <input id="blankType" name="blankType" type="text" value={form.blankType} onChange={handleChange} />
+            <input id="blankType" name="blankType" type="text" value={form.blankType ?? ""} onChange={handleChange} />
           </div>
           {isSizeProduct ? (
             <div className="form-group">
@@ -156,7 +156,7 @@ export default function NewOrderPage() {
                       name={f.name}
                       type="number"
                       min="0"
-                      value={form[f.name as keyof typeof form]}
+                      value={form[f.name as keyof typeof form] ?? ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -171,7 +171,7 @@ export default function NewOrderPage() {
                 name="itemQuantity"
                 type="number"
                 min="1"
-                value={form.itemQuantity}
+                value={form.itemQuantity ?? ""}
                 onChange={handleChange}
               />
             </div>
@@ -182,7 +182,7 @@ export default function NewOrderPage() {
               id="expectedDate"
               name="expectedDate"
               type="date"
-              value={form.expectedDate}
+              value={form.expectedDate ?? ""}
               onChange={handleChange}
             />
           </div>
@@ -191,7 +191,7 @@ export default function NewOrderPage() {
             <textarea
               id="notes"
               name="notes"
-              value={form.notes}
+              value={form.notes ?? ""}
               onChange={handleChange}
               placeholder="General notes about this order"
               rows={3}
@@ -206,4 +206,5 @@ export default function NewOrderPage() {
       </div>
     </main>
   )
+}
 }

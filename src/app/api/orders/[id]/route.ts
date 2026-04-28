@@ -1,119 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { ProductType } from '@prisma/client'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma' // Adjust this import path if needed
 
-export const dynamic = 'force-dynamic'
-
-// --- GET handler: Lists orders ---
-export async function GET() {
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
-  return NextResponse.json(orders)
-}
-
-// --- POST handler: Creates a new order ---
-export async function POST(request: NextRequest) {
-  const body = await request.json()
-
-  const {
-    title,
-    vendor,
-    sku,
-    productType,
-    designName,
-    blankType,
-    expectedDate,
-    itemQuantity,
-    notes,
-    qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, qty4X,
-  } = body
-
-  if (!title || typeof title !== 'string' || title.trim() === '') {
-    return NextResponse.json({ error: 'Title is required' }, { status: 400 })
-  }
-  if (!productType || typeof productType !== 'string') {
-    return NextResponse.json({ error: 'Product type is required' }, { status: 400 })
+export async function GET(request, { params }) {
+  // Parse order id from the url
+  const id = Number(params.id)
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 })
   }
 
-  // For T-shirts, Sweatshirts, Jackets, designName is required
-  if (
-    productType === 'TShirt' ||
-    productType === 'Sweatshirt' ||
-    productType === 'Jacket'
-  ) {
-    if (!designName || typeof designName !== 'string' || designName.trim() === '') {
-      return NextResponse.json({ error: 'Design name is required for garment orders' }, { status: 400 })
-    }
-    // At least one garment quantity must be > 0
-    const sizes = [qtySmall, qtyMedium, qtyLarge, qtyXL, qty2X, qty3X, qty4X].map(
-      q => Number.isInteger(q) ? q : 0
-    );
-    if (sizes.every(q => q <= 0)) {
-      return NextResponse.json({ error: 'At least one size must have a quantity > 0' }, { status: 400 })
-    }
-  } else {
-    // For other product types, require itemQuantity
-    if (!Number.isInteger(itemQuantity) || itemQuantity < 1) {
-      return NextResponse.json({ error: 'Quantity must be a positive integer' }, { status: 400 })
-    }
+  // Fetch the order from the database
+  const order = await prisma.order.findUnique({ where: { id } })
+
+  if (!order) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  const allowedTypes = ['TShirt', 'Sweatshirt', 'Jacket', 'Hat', 'Diecast', 'Other'] as const;
-
-  const typeValue: ProductType = allowedTypes.includes(productType as any)
-    ? productType as ProductType
-    : 'Other';
-
-  const data: any = {
-    title: title.trim(),
-    vendor: vendor?.trim() || null,
-    sku: sku?.trim() || null,
-    productType: typeValue,
-    designName: designName?.trim() || null,
-    blankType: blankType?.trim() || null,
-    expectedDate: expectedDate ? new Date(expectedDate) : null,
-    notes: notes?.trim() || null,
-    status: 'Draft',
-  };
-
-  // --- FIXED SECTION ---
-  if (
-    typeValue === ProductType.TShirt ||
-    typeValue === ProductType.Sweatshirt ||
-    typeValue === ProductType.Jacket
-  ) {
-    // Calculate itemQuantity as the sum of all size fields
-    const sizeQuantities = [
-      Number.isInteger(qtySmall) ? qtySmall : 0,
-      Number.isInteger(qtyMedium) ? qtyMedium : 0,
-      Number.isInteger(qtyLarge) ? qtyLarge : 0,
-      Number.isInteger(qtyXL) ? qtyXL : 0,
-      Number.isInteger(qty2X) ? qty2X : 0,
-      Number.isInteger(qty3X) ? qty3X : 0,
-      Number.isInteger(qty4X) ? qty4X : 0,
-    ];
-    data.itemQuantity = sizeQuantities.reduce((a, b) => a + b, 0);
-    data.qtySmall = sizeQuantities[0];
-    data.qtyMedium = sizeQuantities[1];
-    data.qtyLarge = sizeQuantities[2];
-    data.qtyXL = sizeQuantities[3];
-    data.qty2X = sizeQuantities[4];
-    data.qty3X = sizeQuantities[5];
-    data.qty4X = sizeQuantities[6];
-  } else {
-    data.itemQuantity = Number.isInteger(itemQuantity) ? itemQuantity : 0;
-    data.qtySmall = null;
-    data.qtyMedium = null;
-    data.qtyLarge = null;
-    data.qtyXL = null;
-    data.qty2X = null;
-    data.qty3X = null;
-    data.qty4X = null;
-  }
-  // --- END FIXED SECTION ---
-
-  const order = await prisma.order.create({ data });
-
-  return NextResponse.json(order, { status: 201 });
+  return NextResponse.json(order, { status: 200 })
 }

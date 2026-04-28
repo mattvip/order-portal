@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-
-alert("NEW ORDER PAGE JS IS RUNNING! (" + Math.random() + ")");
 
 const SIZE_FIELDS = [
   { name: 'qtySmall', label: 'Small' },
@@ -22,6 +20,11 @@ export default function NewOrderPage() {
   const router = useRouter()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Browser-only alert to prove your code is running (remove when debugging is done!)
+  useEffect(() => {
+    alert("NEW ORDER PAGE JS IS RUNNING! " + Math.random())
+  }, [])
 
   const [form, setForm] = useState({
     title: '',
@@ -56,7 +59,7 @@ export default function NewOrderPage() {
     setError('')
     setSubmitting(true)
 
-    // ---> Debug log to confirm the handler is firing
+    // Debug log to confirm the handler is firing
     console.log("HANDLE SUBMIT FIRED")
 
     const body: any = {
@@ -78,7 +81,7 @@ export default function NewOrderPage() {
       body.itemQuantity = parseInt(form.itemQuantity, 10) || 0
     }
 
-    // ---> Debug log to see the exact payload sent to backend
+    // Debug log to see the exact payload sent to backend
     console.log('ORDER SUBMISSION PAYLOAD:', body)
 
     const res = await fetch('/api/orders', {

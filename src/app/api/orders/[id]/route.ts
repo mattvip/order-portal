@@ -1,3 +1,19 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import nodemailer from 'nodemailer'
+
+export async function GET(request: NextRequest, { params }: any) {
+  const id = Number(params.id)
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 })
+  }
+  const order = await prisma.order.findUnique({ where: { id } })
+  if (!order) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  }
+  return NextResponse.json(order, { status: 200 })
+}
+
 export async function PATCH(request: NextRequest, { params }: any) {
   const id = Number(params.id)
   if (isNaN(id)) {
@@ -30,7 +46,7 @@ export async function PATCH(request: NextRequest, { params }: any) {
         },
       })
 
-      // 🟢 Put all order fields in the email:
+      // Compose the email body from all order fields
       const {
         id,
         title,
@@ -56,7 +72,7 @@ export async function PATCH(request: NextRequest, { params }: any) {
 
       const mailOptions = {
         from: process.env.SMTP_USER,
-        to: 'stitch98@stitch98.com',
+        to: 'stitch98@stitch98.com', // Hard-coded vendor email
         subject: `Order #${id} submitted`,
         html: `
           <h2>Order #${id} Submitted</h2>

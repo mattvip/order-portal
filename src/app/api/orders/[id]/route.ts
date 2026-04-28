@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma' // Adjust this import path if your prisma client is elsewhere
+import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: any) {
   const id = Number(params.id)
   if (isNaN(id)) {
     return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 })

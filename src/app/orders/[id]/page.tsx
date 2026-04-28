@@ -25,9 +25,10 @@ interface Order {
   qty4X?: number
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const cls = status.replace(/\s+/g, '')
-  return <span className={`badge badge-${cls}`}>{status}</span>
+function StatusBadge({ status }: { status?: string }) {
+  const safeStatus = status ?? 'Unknown'
+  const cls = safeStatus.replace(/\s+/g, '')
+  return <span className={`badge badge-${cls}`}>{safeStatus}</span>
 }
 
 export default function OrderDetailPage() {
@@ -105,7 +106,7 @@ export default function OrderDetailPage() {
           </div>
           <div className="detail-item">
             <label>SKU</label>
-            <p>{order.sku}</p>
+            <p>{order.sku ?? ''}</p>
           </div>
           <div className="detail-item">
             <label>Product Type</label>
@@ -119,15 +120,15 @@ export default function OrderDetailPage() {
           </div>
           <div className="detail-item">
             <label>Expected Date</label>
-            <p>{new Date(order.expectedDate).toLocaleDateString()}</p>
+            <p>{order.expectedDate ? new Date(order.expectedDate).toLocaleDateString() : ''}</p>
           </div>
           <div className="detail-item">
             <label>Created</label>
-            <p>{new Date(order.createdAt).toLocaleString()}</p>
+            <p>{order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}</p>
           </div>
           <div className="detail-item">
             <label>Last Updated</label>
-            <p>{new Date(order.updatedAt).toLocaleString()}</p>
+            <p>{order.updatedAt ? new Date(order.updatedAt).toLocaleString() : ''}</p>
           </div>
         </div>
 
@@ -137,23 +138,23 @@ export default function OrderDetailPage() {
             <>
               <div className="detail-item">
                 <label>Design Name</label>
-                <p>{order.designName}</p>
+                <p>{order.designName ?? ''}</p>
               </div>
               <div className="detail-item">
                 <label>Blank Type</label>
-                <p>{order.blankType}</p>
+                <p>{order.blankType ?? ''}</p>
               </div>
             </>
           )}
           {(order.productType === 'Hat' || order.productType === 'Diecast') && order.blankType && (
             <div className="detail-item">
               <label>Blank Type</label>
-              <p>{order.blankType}</p>
+              <p>{order.blankType ?? ''}</p>
             </div>
           )}
           <div className="detail-item">
             <label>Quantity</label>
-            <p>{order.itemQuantity}</p>
+            <p>{order.itemQuantity ?? ''}</p>
           </div>
           {order.productType === 'TShirt' && (
             <div className="detail-item">

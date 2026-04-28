@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+alert("NEW ORDER PAGE JS IS RUNNING! (" + Math.random() + ")");
+
 const SIZE_FIELDS = [
   { name: 'qtySmall', label: 'Small' },
   { name: 'qtyMedium', label: 'Medium' },

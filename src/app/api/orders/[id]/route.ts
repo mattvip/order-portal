@@ -32,34 +32,45 @@ export async function PATCH(request: NextRequest, { params }: any) {
       where: { id },
       data: {
         ...(body.status ? { status: body.status } : {}),
-        // ...other fields you want to update upon submission
+        // add more fields here if needed
       }
     })
 
     // Send email when order is submitted
     if (body.status === 'Submitted') {
-      // Fill in your own sender and recipient
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.GMAIL_USER,    // your Gmail address
-          pass: process.env.GMAIL_PASS,    // your Gmail App password
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
         },
       })
 
       const mailOptions = {
-        from: process.env.GMAIL_USER,
-        to: updatedOrder.vendor || 'stitch98@stitch98.com', // Update this as needed
+        from: process.env.SMTP_USER,
+        to: 'stitch98@stitch98.com', // <-- Hardcoded vendor address
         subject: `Order #${updatedOrder.id} submitted`,
         html: `<p>Your order titled <b>${updatedOrder.title}</b> has been submitted.</p>`,
       }
 
-      await transporter.sendMail(mailOptions)
+      try {
+        await transporter.sendMail(mailOptions)
+      } catch (emailErr) {
+        // Log detailed email failure to help debugging
+        console.error('EMAIL SEND ERROR:', emailErr)
+        return NextResponse.json({
+          error: 'Order updated but email failed',
+          details: String(emailErr)
+        }, { status: 500 })
+      }
     }
 
     return NextResponse.json(updatedOrder, { status: 200 })
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Could not update order' }, { status: 500 })
+    console.error('ORDER PATCH ERROR:', error)
+    return NextResponse.json({
+      error: 'Could not update order',
+      details: String(error)
+    }, { status: 500 })
   }
 }

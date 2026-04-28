@@ -49,7 +49,7 @@ export async function PATCH(request: NextRequest, { params }: any) {
 
       const mailOptions = {
         from: process.env.GMAIL_USER,
-        to: updatedOrder.vendorEmail || 'stitch98@stitch98.com', // Update this as needed
+        to: updatedOrder.vendor || 'stitch98@stitch98.com', // Update this as needed
         subject: `Order #${updatedOrder.id} submitted`,
         html: `<p>Your order titled <b>${updatedOrder.title}</b> has been submitted.</p>`,
       }

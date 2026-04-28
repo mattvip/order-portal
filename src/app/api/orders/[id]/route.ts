@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma' // adjust if your prisma client is elsewhere
+import { prisma } from '@/lib/prisma'
+import { Resend } from 'resend'   // <-- add this line if using Resend
+
+const resend = new Resend(process.env.RESEND_API_KEY)  // <-- add this for Resend
 
 export async function GET(request: NextRequest, { params }: any) {
   const id = Number(params.id)
@@ -13,6 +16,7 @@ export async function GET(request: NextRequest, { params }: any) {
   return NextResponse.json(order, { status: 200 })
 }
 
+// ---- PATCH HANDLER STARTS HERE ----
 export async function PATCH(request: NextRequest, { params }: any) {
   const id = Number(params.id)
   if (isNaN(id)) {
@@ -31,11 +35,21 @@ export async function PATCH(request: NextRequest, { params }: any) {
       where: { id },
       data: {
         ...(body.status ? { status: body.status } : {}),
-        // add more fields if needed for your logic
+        // add more fields as needed if required
       }
     })
 
-    // TODO: add your email sending logic here, if needed
+    // Send email on "Submitted" status
+    if (body.status === 'Submitted') {
+      // Set the correct vendor email
+      const vendorEmail = updatedOrder.vendorEmail || 'vendor@example.com'
+      await resend.emails.send({
+        from: 'noreply@yourdomain.com',
+        to: vendorEmail,
+        subject: `Order #${updatedOrder.id} submitted`,
+        html: `<p>Your order titled <b>${updatedOrder.title}</b> has been submitted.</p>`
+      })
+    }
 
     return NextResponse.json(updatedOrder, { status: 200 })
   } catch (error) {

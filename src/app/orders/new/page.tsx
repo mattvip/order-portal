@@ -106,7 +106,8 @@ export default function NewOrderPage() {
   return (
     <main className="container">
       <div className="page-header">
-        <h1>New Order</h1>
+        {/* VISUAL TEST! Change the text below to guarantee the correct file is live */}
+        <h1>New Order PAGE TEST {Math.random()}</h1>
         <Link href="/orders" className="btn btn-secondary">← Back</Link>
       </div>
       <div className="card">

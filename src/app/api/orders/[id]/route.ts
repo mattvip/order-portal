@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Resend } from 'resend'   // <-- add this line if using Resend
-
-const resend = new Resend(process.env.RESEND_API_KEY)  // <-- add this for Resend
+import nodemailer from 'nodemailer'
 
 export async function GET(request: NextRequest, { params }: any) {
   const id = Number(params.id)
@@ -16,7 +14,6 @@ export async function GET(request: NextRequest, { params }: any) {
   return NextResponse.json(order, { status: 200 })
 }
 
-// ---- PATCH HANDLER STARTS HERE ----
 export async function PATCH(request: NextRequest, { params }: any) {
   const id = Number(params.id)
   if (isNaN(id)) {
@@ -35,24 +32,34 @@ export async function PATCH(request: NextRequest, { params }: any) {
       where: { id },
       data: {
         ...(body.status ? { status: body.status } : {}),
-        // add more fields as needed if required
+        // ...other fields you want to update upon submission
       }
     })
 
-    // Send email on "Submitted" status
+    // Send email when order is submitted
     if (body.status === 'Submitted') {
-      // Set the correct vendor email
-      const vendorEmail = updatedOrder.vendorEmail || 'vendor@example.com'
-      await resend.emails.send({
-        from: 'noreply@yourdomain.com',
-        to: vendorEmail,
-        subject: `Order #${updatedOrder.id} submitted`,
-        html: `<p>Your order titled <b>${updatedOrder.title}</b> has been submitted.</p>`
+      // Fill in your own sender and recipient
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,    // your Gmail address
+          pass: process.env.GMAIL_PASS,    // your Gmail App password
+        },
       })
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: updatedOrder.vendorEmail || 'vendor@example.com', // Update this as needed
+        subject: `Order #${updatedOrder.id} submitted`,
+        html: `<p>Your order titled <b>${updatedOrder.title}</b> has been submitted.</p>`,
+      }
+
+      await transporter.sendMail(mailOptions)
     }
 
     return NextResponse.json(updatedOrder, { status: 200 })
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: 'Could not update order' }, { status: 500 })
   }
 }
